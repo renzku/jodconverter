@@ -97,8 +97,8 @@ class OfficeProcess {
         waitForProcessToDie();
         existingPid = processManager.findPid(processQuery);
       }
-
-      if (existingPid != PID_NOT_FOUND && existingPid != PID_UNKNOWN) {
+      // 20180104  -- 配置不启动管理进程isWithoutProcess，尝试连接已存在的进程。则不抛出异常
+      if (existingPid != PID_NOT_FOUND && existingPid != PID_UNKNOWN && !config.isWithoutProcess()) {
         throw new OfficeException(
             String.format(
                 "A process with acceptString '%s' is already running; pid %d",
@@ -226,10 +226,33 @@ class OfficeProcess {
    * Gets whether the office process is running.
    *
    * @return {@code true} is the office process is running; {@code false otherwise}.
+   *
+   * 20180104 这里如果是不启动process启动，则按是否存在pid，返回true or false
    */
   public boolean isRunning() {
+    boolean isRun = true;
+    if(config.isWithoutProcess()){
+      final String acceptString =
+              officeUrl.getConnectionAndParametersAsString()
+                      + ";"
+                      + officeUrl.getProtocolAndParametersAsString()
+                      + ";"
+                      + officeUrl.getRootOid();
 
-    return process != null && getExitCode() == null;
+      // Search for an existing process.
+      final ProcessQuery processQuery = new ProcessQuery("soffice", acceptString);
+      try {
+        long expid = config.getProcessManager().findPid(processQuery);
+        if(expid == PID_NOT_FOUND || pid == PID_UNKNOWN ){
+          isRun = false;
+        }
+      }catch (Exception e){
+        isRun = false;
+      }
+    }else {
+      isRun = process != null && getExitCode() == null;
+    }
+    return isRun;
   }
 
   /**
@@ -339,8 +362,12 @@ class OfficeProcess {
         acceptString,
         instanceProfileDir);
     try {
-      process = processBuilder.start();
+      // 20180104  -- 配置不启动管理进程process，尝试连接已存在的进程。则pid存在时不启动process
       pid = config.getProcessManager().findPid(processQuery);
+      if(pid == PID_NOT_FOUND || pid == PID_UNKNOWN ){
+        process = processBuilder.start();
+        pid = config.getProcessManager().findPid(processQuery);
+      }
       LOGGER.info("Started process{}", pid == PID_UNKNOWN ? "" : "; pid = " + pid);
     } catch (IOException ioEx) {
       throw new OfficeException(

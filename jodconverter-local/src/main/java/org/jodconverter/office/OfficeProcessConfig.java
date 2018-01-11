@@ -37,6 +37,7 @@ class OfficeProcessConfig {
    * already exists.
    */
   public static final boolean DEFAULT_KILL_EXISTING_PROCESS = true;
+  public static final boolean DEFAULT_WITHOUT_PROCESS = false;
 
   private File officeHome;
   private File workingDir;
@@ -44,6 +45,7 @@ class OfficeProcessConfig {
   private String[] runAsArgs;
   private File templateProfileDir;
   private boolean killExistingProcess = DEFAULT_KILL_EXISTING_PROCESS;
+  private boolean withoutProcess = DEFAULT_WITHOUT_PROCESS;
 
   /** Creates configuration with default values. */
   public OfficeProcessConfig() {
@@ -183,5 +185,13 @@ class OfficeProcessConfig {
    */
   public void setKillExistingProcess(final boolean killExistingProcess) {
     this.killExistingProcess = killExistingProcess;
+  }
+
+  public boolean isWithoutProcess() {
+    return withoutProcess;
+  }
+
+  public void setWithoutProcess(boolean withoutProcess) {
+    this.withoutProcess = withoutProcess;
   }
 }

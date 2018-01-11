@@ -106,6 +106,7 @@ public final class LocalOfficeManager extends AbstractOfficeManagerPool {
     private long processRetryInterval = OfficeProcessManagerConfig.DEFAULT_PROCESS_RETRY_INTERVAL;
     private int maxTasksPerProcess = OfficeProcessManagerConfig.DEFAULT_MAX_TASKS_PER_PROCESS;
     private boolean disableOpengl = OfficeProcessManagerConfig.DEFAULT_DISABLE_OPENGL;
+    private boolean withoutProcess = OfficeProcessConfig.DEFAULT_WITHOUT_PROCESS;
 
     // Private ctor so only LocalOfficeManager can initialize an instance of this builder.
     private Builder() {
@@ -151,6 +152,7 @@ public final class LocalOfficeManager extends AbstractOfficeManagerPool {
       config.setDisableOpengl(disableOpengl);
       config.setTaskExecutionTimeout(taskExecutionTimeout);
       config.setTaskQueueTimeout(taskQueueTimeout);
+      config.setWithoutProcess(withoutProcess);
 
       final LocalOfficeManager manager = new LocalOfficeManager(officeUrls, config);
       if (install) {
@@ -377,6 +379,15 @@ public final class LocalOfficeManager extends AbstractOfficeManagerPool {
       return this;
     }
 
+    /**
+     * 配置是否可以不启动进程
+     * @param withoutProcess
+     * @return
+     */
+    public Builder withoutProcess(final boolean withoutProcess){
+      this.withoutProcess = withoutProcess;
+      return this;
+    }
     /**
      * Specifies whether OpenGL must be disabled when starting a new office process. Nothing will be
      * done if OpenGL is already disabled according to the user profile used with the office
